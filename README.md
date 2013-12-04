@@ -1,2 +1,6 @@
-25-headlines
-============
+# 25-headlines
+
+## Installation
+
+    npm install
+    bower install
