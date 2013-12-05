@@ -1,5 +1,4 @@
 var React = require('./react');
-var Router = require('director').Router;
 
 var HeadlineModel = require('./models/headline.js');
 var HeadlineElement = require('./elements/headline.jsx');
@@ -20,12 +19,7 @@ var App = React.createClass({
     },
 
     componentDidMount: function () {
-        var router = new Router({
-            '/': this.setState.bind(this, {nowShowing: constants.ALL_HEADLINES}),
-            '/active': this.setState.bind(this, {nowShowing: constants.ACTIVE_HEADLINES}),
-            '/completed': this.setState.bind(this, {nowShowing: constants.COMPLETED_HEADLINES})
-        });
-        router.init();
+        this.setState.bind(this, {nowShowing: constants.ALL_HEADLINES});
         // this.refs.newField.getDOMNode().focus();
     },
 
@@ -35,22 +29,9 @@ var App = React.createClass({
         this.setState({headlines: this.state.headlines.concat(headline)});
     },
 
-    toggleAll: function (event) {
-        var checked = event.target.checked;
-
-        // Note: it's usually better to use immutable data structures since they're easier to
-        // reason about and React works very well with them. That's why we use map() and filter()
-        // everywhere instead of mutating the array or headline items themselves.
-        var newHeadlines = this.state.headlines.map(function (headline) {
-            return utils.extend({}, headline, {completed: checked});
-        });
-
-        this.setState({headlines: newHeadlines});
-    },
-
     toggle: function (headlineToToggle) {
         var newHeadlines = this.state.headlines.map(function (headline) {
-            return headline !== headlineToToggle ? headline : utils.extend({}, headline, {completed: !headline.completed});
+            return headline !== headlineToToggle ? headline : utils.extend({}, headline, {shortlisted: !headline.shortlisted});
         });
 
         this.setState({headlines: newHeadlines});
@@ -84,9 +65,9 @@ var App = React.createClass({
         this.setState({editing: null});
     },
 
-    clearCompleted: function () {
+    clearNotShortlisted: function () {
         var newHeadlines = this.state.headlines.filter(function (headline) {
-            return !headline.completed;
+            return headline.shortlisted;
         });
 
         this.setState({headlines: newHeadlines});
@@ -101,11 +82,11 @@ var App = React.createClass({
         var main = null;
         var footer = null;
 
-        var activeHeadlineCount = this.state.headlines.reduce(function(accum, headline) {
-            return headline.completed ? accum : accum + 1;
+        var shortlistedCount = this.state.headlines.reduce(function(accum, headline) {
+            return headline.shortlisted ? accum + 1 : accum;
         }, 0);
 
-        var completedCount = this.state.headlines.length - activeHeadlineCount;
+        var notShortlistedCount = this.state.headlines.length - shortlistedCount;
 
         var headlineItems = this.state.headlines.map(function (headline) {
             return (
@@ -130,22 +111,17 @@ var App = React.createClass({
         if (this.state.headlines.length) {
             main = (
                 <section id="main">
-                    <input
-                        id="toggle-all"
-                        type="checkbox"
-                        onChange={this.toggleAll}
-                        checked={activeHeadlineCount === 0}
-                    />
                     <HeadlineListElement items={headlineItems} />
                 </section>
             );
         }
 
-        if (activeHeadlineCount || completedCount) {
+        if (shortlistedCount || notShortlistedCount) {
             footer = (
                 <FooterElement
-                    completedCount={completedCount}
-                    onClearCompleted={this.clearCompleted}
+                    shortlistedCount={shortlistedCount}
+                    notShortlistedCount={notShortlistedCount}
+                    onClearNotShortlisted={this.clearNotShortlisted}
                 />
             );
         }

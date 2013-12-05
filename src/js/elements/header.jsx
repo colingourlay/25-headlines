@@ -22,16 +22,23 @@ module.exports = React.createClass({
 
     render: function () {
         var units = utils.pluralize(this.props.count, ' headline');
+        var newField = null;
 
-        return (
-            <header id="header">
-                <h1>{this.props.count}{units}</h1>
+        if (this.props.count < 25) {
+            newField = (
                 <input
                     ref="newField"
                     id="new-headline"
                     placeholder="Enter a new headline..."
                     onKeyDown={this.onKeyDown}
                 />
+            );
+        }
+
+        return (
+            <header id="header">
+                <h1>{this.props.count}{units}</h1>
+                {newField}
             </header>
         );
     }

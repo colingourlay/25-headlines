@@ -61,14 +61,14 @@ module.exports = React.createClass({
     render: function () {
         return (
             <li className={React.addons.classSet({
-                completed: this.props.headline.completed,
+                shortlisted: this.props.headline.shortlisted,
                 editing: this.props.editing
             })}>
                 <div className="view">
                     <input
                         className="toggle"
                         type="checkbox"
-                        checked={this.props.headline.completed ? 'checked' : null}
+                        checked={this.props.headline.shortlisted ? 'shortlisted' : null}
                         onChange={this.props.onToggle}
                     />
                     <label onDoubleClick={this.handleEdit}>
