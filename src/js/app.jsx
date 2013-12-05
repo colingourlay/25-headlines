@@ -1,56 +1,38 @@
-var Router = require('director').Router;
-// var React = require('react-tools').React;
 var React = require('./react');
+var Router = require('director').Router;
 
-var TodoItem = require('./todoItem.jsx');
-var TodoFooter = require('./footer.jsx');
-var Utils = require('./utils');
+var HeadlineModel = require('./models/headline.js');
+var HeadlineElement = require('./elements/headline.jsx');
+var HeadlineListElement = require('./elements/headline-list.jsx');
+var HeaderElement = require('./elements/header.jsx');
+var FooterElement = require('./elements/footer.jsx');
+var constants = require('./constants');
+var utils = require('./utils');
 
-window.ALL_TODOS = 'all';
-window.ACTIVE_TODOS = 'active';
-window.COMPLETED_TODOS = 'completed';
-
-var ENTER_KEY = 13;
-
-var TodoApp = React.createClass({
+var App = React.createClass({
     getInitialState: function () {
-        var todos = Utils.store('react-todos');
+        var headlines = utils.store('react-headlines');
         return {
-            todos: todos,
-            nowShowing: ALL_TODOS,
+            headlines: headlines,
+            nowShowing: constants.ALL_HEADLINES,
             editing: null
         };
     },
 
     componentDidMount: function () {
         var router = new Router({
-            '/': this.setState.bind(this, {nowShowing: ALL_TODOS}),
-            '/active': this.setState.bind(this, {nowShowing: ACTIVE_TODOS}),
-            '/completed': this.setState.bind(this, {nowShowing: COMPLETED_TODOS})
+            '/': this.setState.bind(this, {nowShowing: constants.ALL_HEADLINES}),
+            '/active': this.setState.bind(this, {nowShowing: constants.ACTIVE_HEADLINES}),
+            '/completed': this.setState.bind(this, {nowShowing: constants.COMPLETED_HEADLINES})
         });
         router.init();
-        this.refs.newField.getDOMNode().focus();
+        // this.refs.newField.getDOMNode().focus();
     },
 
-    handleNewTodoKeyDown: function (event) {
-        if (event.which !== ENTER_KEY) {
-            return;
-        }
+    addHeadline: function (title) {
+        var headline = HeadlineModel(title);
 
-        var val = this.refs.newField.getDOMNode().value.trim();
-        var newTodo;
-
-        if (val) {
-            newTodo = {
-                id: Utils.uuid(),
-                title: val,
-                completed: false
-            };
-            this.setState({todos: this.state.todos.concat([newTodo])});
-            this.refs.newField.getDOMNode().value = '';
-        }
-
-        return false;
+        this.setState({headlines: this.state.headlines.concat(headline)});
     },
 
     toggleAll: function (event) {
@@ -58,44 +40,44 @@ var TodoApp = React.createClass({
 
         // Note: it's usually better to use immutable data structures since they're easier to
         // reason about and React works very well with them. That's why we use map() and filter()
-        // everywhere instead of mutating the array or todo items themselves.
-        var newTodos = this.state.todos.map(function (todo) {
-            return Utils.extend({}, todo, {completed: checked});
+        // everywhere instead of mutating the array or headline items themselves.
+        var newHeadlines = this.state.headlines.map(function (headline) {
+            return utils.extend({}, headline, {completed: checked});
         });
 
-        this.setState({todos: newTodos});
+        this.setState({headlines: newHeadlines});
     },
 
-    toggle: function (todoToToggle) {
-        var newTodos = this.state.todos.map(function (todo) {
-            return todo !== todoToToggle ? todo : Utils.extend({}, todo, {completed: !todo.completed});
+    toggle: function (headlineToToggle) {
+        var newHeadlines = this.state.headlines.map(function (headline) {
+            return headline !== headlineToToggle ? headline : utils.extend({}, headline, {completed: !headline.completed});
         });
 
-        this.setState({todos: newTodos});
+        this.setState({headlines: newHeadlines});
     },
 
-    destroy: function (todo) {
-        var newTodos = this.state.todos.filter(function (candidate) {
-            return candidate.id !== todo.id;
+    destroy: function (headline) {
+        var newHeadlines = this.state.headlines.filter(function (candidate) {
+            return candidate.id !== headline.id;
         });
 
-        this.setState({todos: newTodos});
+        this.setState({headlines: newHeadlines});
     },
 
-    edit: function (todo, callback) {
-        // refer to todoItem.js `handleEdit` for the reasoning behind the
+    edit: function (headline, callback) {
+        // refer to headlineItem.js `handleEdit` for the reasoning behind the
         // callback
-        this.setState({editing: todo.id}, function () {
+        this.setState({editing: headline.id}, function () {
             callback();
         });
     },
 
-    save: function (todoToSave, text) {
-        var newTodos = this.state.todos.map(function (todo) {
-            return todo !== todoToSave ? todo : Utils.extend({}, todo, {title: text});
+    save: function (headlineToSave, text) {
+        var newHeadlines = this.state.headlines.map(function (headline) {
+            return headline !== headlineToSave ? headline : utils.extend({}, headline, {title: text});
         });
 
-        this.setState({todos: newTodos, editing: null});
+        this.setState({headlines: newHeadlines, editing: null});
     },
 
     cancel: function () {
@@ -103,90 +85,74 @@ var TodoApp = React.createClass({
     },
 
     clearCompleted: function () {
-        var newTodos = this.state.todos.filter(function (todo) {
-            return !todo.completed;
+        var newHeadlines = this.state.headlines.filter(function (headline) {
+            return !headline.completed;
         });
 
-        this.setState({todos: newTodos});
+        this.setState({headlines: newHeadlines});
     },
 
     componentDidUpdate: function () {
-        Utils.store('react-todos', this.state.todos);
+        utils.store('react-headlines', this.state.headlines);
     },
 
     render: function () {
-        var footer = null;
+        var header = null;
         var main = null;
+        var footer = null;
 
-        var shownTodos = this.state.todos.filter(function (todo) {
-            switch (this.state.nowShowing) {
-            case ACTIVE_TODOS:
-                return !todo.completed;
-            case COMPLETED_TODOS:
-                return todo.completed;
-            default:
-                return true;
-            }
-        }, this);
+        var activeHeadlineCount = this.state.headlines.reduce(function(accum, headline) {
+            return headline.completed ? accum : accum + 1;
+        }, 0);
 
-        var todoItems = shownTodos.map(function (todo) {
+        var completedCount = this.state.headlines.length - activeHeadlineCount;
+
+        var headlineItems = this.state.headlines.map(function (headline) {
             return (
-                <TodoItem
-                    key={todo.id}
-                    todo={todo}
-                    onToggle={this.toggle.bind(this, todo)}
-                    onDestroy={this.destroy.bind(this, todo)}
-                    onEdit={this.edit.bind(this, todo)}
-                    editing={this.state.editing === todo.id}
-                    onSave={this.save.bind(this, todo)}
+                <HeadlineElement
+                    key={headline.id}
+                    headline={headline}
+                    onToggle={this.toggle.bind(this, headline)}
+                    onDestroy={this.destroy.bind(this, headline)}
+                    onEdit={this.edit.bind(this, headline)}
+                    editing={this.state.editing === headline.id}
+                    onSave={this.save.bind(this, headline)}
                     onCancel={this.cancel}
                 />
             );
         }, this);
 
-        var activeTodoCount = this.state.todos.reduce(function(accum, todo) {
-            return todo.completed ? accum : accum + 1;
-        }, 0);
-
-        var completedCount = this.state.todos.length - activeTodoCount;
-
-        if (activeTodoCount || completedCount) {
-            footer =
-                <TodoFooter
-                    count={activeTodoCount}
-                    completedCount={completedCount}
-                    nowShowing={this.state.nowShowing}
-                    onClearCompleted={this.clearCompleted}
+        header = <HeaderElement
+                    count={this.state.headlines.length}
+                    addHeadline={this.addHeadline}
                 />;
-        }
 
-        if (this.state.todos.length) {
+        if (this.state.headlines.length) {
             main = (
                 <section id="main">
                     <input
                         id="toggle-all"
                         type="checkbox"
                         onChange={this.toggleAll}
-                        checked={activeTodoCount === 0}
+                        checked={activeHeadlineCount === 0}
                     />
-                    <ul id="todo-list">
-                        {todoItems}
-                    </ul>
+                    <HeadlineListElement items={headlineItems} />
                 </section>
+            );
+        }
+
+        if (activeHeadlineCount || completedCount) {
+            footer = (
+                <FooterElement
+                    completedCount={completedCount}
+                    onClearCompleted={this.clearCompleted}
+                />
             );
         }
 
         return (
             <div>
-                <header id="header">
-                    <h1>todos</h1>
-                    <input
-                        ref="newField"
-                        id="new-todo"
-                        placeholder="What needs to be done?"
-                        onKeyDown={this.handleNewTodoKeyDown}
-                    />
-                </header>
+                {header}
                 {main}
                 {footer}
             </div>
@@ -194,13 +160,4 @@ var TodoApp = React.createClass({
     }
 });
 
-React.renderComponent(<TodoApp />, document.getElementById('todoapp'));
-React.renderComponent(
-    <div>
-        <p>Double-click to edit a todo</p>
-        <p>Created by{' '}
-            <a href="http://github.com/petehunt/">petehunt</a>
-        </p>
-        <p>Part of{' '}<a href="http://todomvc.com">TodoMVC</a></p>
-    </div>,
-    document.getElementById('info'));
+React.renderComponent(<App />, document.getElementById('app'));

@@ -1,10 +1,5 @@
-var React = require('./react');
-
-// React.addons = React.addons || {};
-// React.addons.classSet = React.addons.classSet || require('react-tools/src/vendor/stubs/cx');
-
-var ESCAPE_KEY = 27;
-var ENTER_KEY = 13;
+var React = require('../react');
+var constants = require('../constants');
 
 module.exports = React.createClass({
     handleSubmit: function () {
@@ -28,14 +23,14 @@ module.exports = React.createClass({
             node.focus();
             node.setSelectionRange(node.value.length, node.value.length);
         }.bind(this));
-        this.setState({editText: this.props.todo.title});
+        this.setState({editText: this.props.headline.title});
     },
 
     handleKeyDown: function (event) {
-        if (event.keyCode === ESCAPE_KEY) {
-            this.setState({editText: this.props.todo.title});
+        if (event.keyCode === constants.ESCAPE_KEY) {
+            this.setState({editText: this.props.headline.title});
             this.props.onCancel();
-        } else if (event.keyCode === ENTER_KEY) {
+        } else if (event.keyCode === constants.ENTER_KEY) {
             this.handleSubmit();
         }
     },
@@ -45,7 +40,7 @@ module.exports = React.createClass({
     },
 
     getInitialState: function () {
-        return {editText: this.props.todo.title};
+        return {editText: this.props.headline.title};
     },
 
     /**
@@ -56,8 +51,8 @@ module.exports = React.createClass({
      */
     shouldComponentUpdate: function (nextProps, nextState) {
         return (
-            nextProps.todo.id !== this.props.todo.id ||
-            nextProps.todo !== this.props.todo ||
+            nextProps.headline.id !== this.props.headline.id ||
+            nextProps.headline !== this.props.headline ||
             nextProps.editing !== this.props.editing ||
             nextState.editText !== this.state.editText
         );
@@ -66,18 +61,18 @@ module.exports = React.createClass({
     render: function () {
         return (
             <li className={React.addons.classSet({
-                completed: this.props.todo.completed,
+                completed: this.props.headline.completed,
                 editing: this.props.editing
             })}>
                 <div className="view">
                     <input
                         className="toggle"
                         type="checkbox"
-                        checked={this.props.todo.completed ? 'checked' : null}
+                        checked={this.props.headline.completed ? 'checked' : null}
                         onChange={this.props.onToggle}
                     />
                     <label onDoubleClick={this.handleEdit}>
-                        {this.props.todo.title}
+                        {this.props.headline.title}
                     </label>
                     <button className="destroy" onClick={this.props.onDestroy} />
                 </div>
