@@ -26,7 +26,7 @@ var App = React.createClass({
     addHeadline: function (title) {
         var headline = HeadlineModel(title);
 
-        this.setState({headlines: this.state.headlines.concat(headline)});
+        this.setState({headlines: [headline].concat(this.state.headlines)});
     },
 
     toggle: function (headlineToToggle) {
@@ -116,15 +116,11 @@ var App = React.createClass({
             );
         }
 
-        if (shortlistedCount || notShortlistedCount) {
-            footer = (
-                <FooterElement
-                    shortlistedCount={shortlistedCount}
-                    notShortlistedCount={notShortlistedCount}
-                    onClearNotShortlisted={this.clearNotShortlisted}
-                />
-            );
-        }
+        footer = (
+            <FooterElement
+                count={this.state.headlines.length}
+            />
+        );
 
         return (
             <div>

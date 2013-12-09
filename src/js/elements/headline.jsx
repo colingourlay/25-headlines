@@ -13,7 +13,14 @@ module.exports = React.createClass({
         return false;
     },
 
-    handleEdit: function () {
+    handleEdit: function (event) {
+        var labelHeight;
+
+        if ('getComputedStyle' in window) {
+            labelHeight = window.getComputedStyle(event.target).height;
+            this.refs.editField.getDOMNode().style.height = (+labelHeight.split('px')[0] + 20) + 'px';
+        }
+
         // react optimizes renders by batching them. This means you can't call
         // parent's `onEdit` (which in this case triggeres a re-render), and
         // immediately manipulate the DOM as if the rendering's over. Put it as a
@@ -76,14 +83,13 @@ module.exports = React.createClass({
                     </label>
                     <button className="destroy" onClick={this.props.onDestroy} />
                 </div>
-                <input
+                <textarea
                     ref="editField"
                     className="edit"
-                    value={this.state.editText}
                     onBlur={this.handleSubmit}
                     onChange={this.handleChange}
                     onKeyDown={this.handleKeyDown}
-                />
+                >{this.state.editText}</textarea>
             </li>
         );
     }
