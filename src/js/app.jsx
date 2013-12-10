@@ -13,14 +13,8 @@ var App = React.createClass({
         var headlines = utils.store('react-headlines');
         return {
             headlines: headlines,
-            nowShowing: constants.ALL_HEADLINES,
             editing: null
         };
-    },
-
-    componentDidMount: function () {
-        this.setState.bind(this, {nowShowing: constants.ALL_HEADLINES});
-        // this.refs.newField.getDOMNode().focus();
     },
 
     addHeadline: function (title) {
