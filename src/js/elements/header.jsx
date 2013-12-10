@@ -4,6 +4,10 @@ var constants = require('../constants');
 
 module.exports = React.createClass({
 
+    componentDidMount: function () {
+        this.refs.newField.getDOMNode().focus();
+    },
+
     onKeyDown: function (event) {
         if (event.which !== constants.ENTER_KEY) {
             return;
