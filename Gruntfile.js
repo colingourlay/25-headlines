@@ -52,22 +52,6 @@ module.exports = function(grunt) {
 		},
 
 		copy: {
-			bowerdev: {
-				files: [{
-					expand: true,
-					cwd: 'bower_components',
-					src: ['**'],
-					dest: '.dev/bower_components/'
-				}]
-			},
-			bower: {
-				files: [{
-					expand: true,
-					cwd: 'bower_components',
-					src: ['**'],
-					dest: 'dist/bower_components/'
-				}]
-			},
 			filesdev: {
 				files: [{
 					expand: true,
@@ -123,11 +107,6 @@ module.exports = function(grunt) {
 				tasks: 'stylus:dev',
 				interrupt: true
 			},
-			data: {
-				files: 'src/data/**/*',
-				tasks: 'dir2json:dev',
-				interrupt: true
-			},
 			files: {
 				files: 'src/files/**/*',
 				tasks: 'copy:filesdev',
@@ -155,7 +134,6 @@ module.exports = function(grunt) {
 		'jshint',
 		'browserify:dev',
 		'stylus:dev',
-		'copy:bowerdev',
 		'copy:filesdev',
 		'copy:rootdev'
 	]);
@@ -171,7 +149,6 @@ module.exports = function(grunt) {
 		'jshint',
 		'browserify:dist',
 		'stylus:dist',
-		'copy:bower',
 		'copy:files',
 		'copy:root'
 	]);

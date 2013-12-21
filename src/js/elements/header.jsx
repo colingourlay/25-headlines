@@ -1,4 +1,5 @@
-var React = require('../react');
+var React = require('react/addons');
+
 var utils = require('../utils');
 var constants = require('../constants');
 

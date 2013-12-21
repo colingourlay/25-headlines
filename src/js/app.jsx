@@ -1,4 +1,7 @@
-var React = require('./react');
+require('./polyfills');
+require('fastclick')(document.body);
+
+var React = require('react/addons');
 
 var HeadlineModel = require('./models/headline.js');
 var HeadlineElement = require('./elements/headline.jsx');
@@ -11,6 +14,13 @@ var utils = require('./utils');
 var App = React.createClass({
     getInitialState: function () {
         var headlines = utils.store('react-headlines');
+
+        window.onunload = function () {
+            if (window._gaq) {
+                window._gaq.push(['_trackEvent', '25headlines', 'Unload Headline Count', 'All', headlines.length]);
+            }
+        }
+
         return {
             headlines: headlines,
             editing: null
@@ -21,6 +31,14 @@ var App = React.createClass({
         var headline = HeadlineModel(title);
 
         this.setState({headlines: [headline].concat(this.state.headlines)});
+
+        if (window._gaq) {
+            if (this.state.headlines.length === 10) {
+                window._gaq.push(['_trackEvent', '25headlines', 'Added 10', JSON.stringify(this.state.headlines)]);
+            } else if (this.state.headlines.length === 25) {
+                window._gaq.push(['_trackEvent', '25headlines', 'Added 25', JSON.stringify(this.state.headlines)]);
+            }
+        }
     },
 
     toggle: function (headlineToToggle) {

@@ -19,7 +19,10 @@
     "reactify": "~0.4.0"
   },
   "dependencies": {
-    "react-tools": "~0.5.1",
-    "director": "~1.2.1"
+    "director": "~1.2.1",
+    "fastclick": "~0.6.11",
+    "es5-shim-sham": "0.0.1",
+    "envify": "~0.2.0",
+    "react": "~0.8.0"
   }
 }
