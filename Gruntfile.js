@@ -38,6 +38,14 @@ module.exports = function(grunt) {
 			}
 		},
 
+		uglify: {
+			dist: {
+				files: {
+					'dist/js/app.js': ['dist/js/app.js']
+				}
+			}
+		},
+
 		stylus: {
 			dev: {
 				files: {
@@ -121,12 +129,13 @@ module.exports = function(grunt) {
 
 	});
 
-	grunt.loadNpmTasks('grunt-contrib-clean');
-	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-browserify');
-	grunt.loadNpmTasks('grunt-contrib-stylus');
-	grunt.loadNpmTasks('grunt-contrib-copy');
+	grunt.loadNpmTasks('grunt-contrib-clean');
 	grunt.loadNpmTasks('grunt-contrib-connect');
+	grunt.loadNpmTasks('grunt-contrib-copy');
+	grunt.loadNpmTasks('grunt-contrib-jshint');
+	grunt.loadNpmTasks('grunt-contrib-stylus');
+	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 
 	grunt.registerTask('dev', [
@@ -148,6 +157,7 @@ module.exports = function(grunt) {
 		'clean:dist',
 		'jshint',
 		'browserify:dist',
+		'uglify:dist',
 		'stylus:dist',
 		'copy:files',
 		'copy:root'
